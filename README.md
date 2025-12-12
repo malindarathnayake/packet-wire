@@ -126,7 +126,7 @@ networks:
     driver: bridge
 ```
 
-### Manual Build (All Services)
+### Manual Build 
 
 ```bash
 # Build all images
@@ -158,15 +158,6 @@ Images are automatically built and published to GitHub Container Registry on com
 - `ghcr.io/<your-org>/packet-wire-udp-listener:latest`
 - `ghcr.io/<your-org>/packet-wire-udp-sender:latest`
 - `ghcr.io/<your-org>/packet-wire-dashboard:latest`
-
-## Use Cases
-
-- **Network Testing:** Validate UDP packet delivery and routing
-- **IoT Simulation:** Simulate device traffic patterns
-- **Performance Analysis:** Measure latency and throughput
-- **Traffic Visualization:** Understand data flows with Sankey diagrams
-- **Protocol Testing:** Test UDP-based protocols and applications
-- **Load Testing:** Generate sustained UDP traffic for stress testing
 
 ## Development
 
@@ -200,8 +191,4 @@ cd dashboard && go build -o dashboard-server server.go
 ## License
 
 [Add your license here]
-
-## Contributing
-
-[Add contributing guidelines here]
 
