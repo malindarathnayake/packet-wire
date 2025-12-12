@@ -1,0 +1,8 @@
+{
+  "listen_addr": ":9100",
+  "capture_dir": "/captures",
+  "buffer_size": 2048,
+  "reply_mode": true,
+  "ack_message": "ACK-PLTEST_{id_name}"
+}
+

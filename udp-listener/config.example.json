@@ -1,0 +1,17 @@
+{
+  "listen_addr": ":9100",
+  "capture_dir": "/captures",
+  "buffer_size": 2048,
+  "reply_mode": true,
+  "ack_message": "ACK-PLTEST_{id_name}",
+  "encryption_passphrase": "entrust-spearmint-defy-nutrient-facial-blinking",
+  "file_receive_mode": true,
+  "file_receive_dir": "/captures/files",
+  "client_id": "listener-01",
+  "dashboard_url": "http://dashboard:8080/api/metrics",
+  "heartbeat_interval_seconds": 5,
+  "listen_ip": "",
+  "local_ip": "",
+  "external_ip": ""
+}
+
