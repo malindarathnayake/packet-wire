@@ -1,22 +1,18 @@
-# UDP Switchboard - Sankey Dashboard
+<p align="center">
+  <img src="../Logo/svglogo.svg" alt="Packet Wire" width="400">
+</p>
 
-A beautiful real-time dashboard that visualizes traffic flows through your UDP Switchboard using interactive Sankey diagrams, just like the example you shared.
+# Dashboard
+
+Web UI for visualizing UDP traffic flows using Sankey diagrams.
 
 ## Features
 
-🔄 **Real-time Traffic Flow Visualization**
-- Customer → Device → Target flow analysis
-- Interactive Sankey diagrams with hover tooltips
-- Color-coded backend systems (ATL Legacy vs Nginx Migrated)
-
-📊 **Rich Metrics & Analytics**
-- Total packet counts and success rates
-- Average latency tracking per flow
-- Active routes and customer counts
+- Sankey flow diagrams (Customer → Device → Target)
+- Packet counts and success rates
+- Latency tracking per flow
 - Time-based filtering (5m to 24h)
-
-🎛️ **Flexible Filtering**
-- Flow type selection (Customer→Target, Device→Target, etc.)
+- Flow type filtering
 - Status filtering (Success, Timeouts, Errors)
 - Minimum packet threshold filtering
 - Auto-refresh every 30 seconds

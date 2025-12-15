@@ -1,8 +1,12 @@
-# UDP Listener Utility
+<p align="center">
+  <img src="../Logo/svglogo.svg" alt="Packet Wire" width="400">
+</p>
 
-This utility runs a small UDP listener that writes every received packet into a CSV file. The file name includes the Unix epoch at startup so each run creates a separate capture file.
+# UDP Listener
 
-> **📊 Testing for packet drops?** See the [PW-Test Workflow Guide](../_docs/test-workflow.md) for sequence tracking and drop analysis.
+UDP packet capture utility that logs incoming packets to CSV files. Each run creates a timestamped capture file.
+
+> Testing for packet drops? See the [PW-Test Workflow Guide](../_docs/test-workflow.md).
 
 Each CSV row contains:
 

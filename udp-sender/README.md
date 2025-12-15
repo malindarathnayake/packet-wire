@@ -1,8 +1,12 @@
+<p align="center">
+  <img src="../Logo/svglogo.svg" alt="Packet Wire" width="400">
+</p>
+
 # UDP Sender
 
-Simple CLI to send UDP messages or chunked file payloads to a target IP/port, useful for simulating IoT devices that talk to your UDP listener or switchboard.
+CLI to send UDP messages or chunked file payloads. Useful for testing UDP endpoints and simulating IoT devices.
 
-> **📊 Testing for packet drops?** See the [PW-Test Workflow Guide](../_docs/test-workflow.md) for sequence tracking and drop analysis.
+> Testing for packet drops? See the [PW-Test Workflow Guide](../_docs/test-workflow.md).
 
 ## Build (Docker image)
 
