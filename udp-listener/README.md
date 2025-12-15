@@ -2,6 +2,8 @@
 
 This utility runs a small UDP listener that writes every received packet into a CSV file. The file name includes the Unix epoch at startup so each run creates a separate capture file.
 
+> **📊 Testing for packet drops?** See the [PW-Test Workflow Guide](../_docs/test-workflow.md) for sequence tracking and drop analysis.
+
 Each CSV row contains:
 
 - `timestamp` (RFC3339 with nanoseconds)
@@ -58,6 +60,9 @@ Configuration fields:
 - `listen_ip`: Listen IP address for metrics reporting (optional, auto-detected if empty)
 - `local_ip`: Local IP address for metrics reporting (optional)
 - `external_ip`: External IP address for metrics reporting (optional)
+- `test_mode`: Enable detailed test message tracking for drop analysis (`true`/`false`)
+- `test_report_file`: Output path for JSON test report (auto-generated if empty)
+- `enhanced_ack`: Use structured ACK format `ACK|seq|timestamp|id` (`true`/`false`)
 
 Edit the values as needed, mount the file into the container, and set the `CONFIG_FILE` environment variable to its path.
 
@@ -98,6 +103,9 @@ If no config file is provided, the listener falls back to environment variables:
 - `LISTEN_IP` – listen IP address for metrics reporting (optional).
 - `LOCAL_IP` – local IP address for metrics reporting (optional).
 - `EXTERNAL_IP` – external IP address for metrics reporting (optional).
+- `TEST_MODE` – enable test message tracking for drop analysis (default `false`).
+- `TEST_REPORT_FILE` – output path for JSON test report (auto-generated if empty).
+- `ENHANCED_ACK` – use structured ACK format (default `false`).
 
 ## Building the Docker Image
 

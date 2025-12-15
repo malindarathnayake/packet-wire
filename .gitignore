@@ -35,6 +35,7 @@ go.work
 # Config files with potential secrets (keep examples)
 config.json
 !config.example.json
+!deploy/env.example
 
 # Capture files and data
 captures/

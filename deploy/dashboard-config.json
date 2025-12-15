@@ -1,0 +1,30 @@
+{
+  "targetGroups": [
+    {
+      "name": "Relay",
+      "ipPatterns": ["209.34.233.*"],
+      "color": "#3498db",
+      "description": "Legacy backend servers"
+    },
+    {
+      "name": "Mirrored",
+      "ipPatterns": ["192.168.94.241"],
+      "color": "#2ecc71",
+      "description": "New backend servers"
+    },
+    {
+      "name": "Errors/Timeouts",
+      "statusMatch": ["error", "timeout"],
+      "color": "#e74c3c",
+      "description": "Failed or timed out connections"
+    }
+  ],
+  "defaultTargetColor": "#f39c12",
+  "showUnmatchedIPs": true,
+  "layerColors": {
+    "customer": "#9b59b6",
+    "device": "#34495e"
+  },
+  "logLevel": "info"
+}
+

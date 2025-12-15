@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  udp-listener:
+    image: ghcr.io/malindarathnayake/packet-wire-udp-listener:latest
+    container_name: packet-wire-listener
+    ports:
+      - "9000:9000/udp"
+    environment:
+      - CONFIG_FILE=/config/config.json
+    volumes:
+      - ./captures:/captures
+      - ./listener-config.json:/config/config.json:ro
+    networks:
+      - packet-wire
+    restart: unless-stopped
+
+networks:
+  packet-wire:
+    driver: bridge
+    name: packet-wire-network
+

@@ -27,6 +27,14 @@ const (
 	// TimestampPrefix marks packets with embedded timestamp for latency calculation
 	TimestampPrefix    = "TIMESTAMP|"
 	TimestampDelimiter = "|"
+
+	// TestMessagePrefix marks test packets with sequence numbers
+	// Format: TEST|{seq_num}|{payload}
+	TestMessagePrefix = "TEST|"
+
+	// ACK format for enhanced reply mode
+	// Format: ACK|{seq_num}|{receive_timestamp_ns}|{id_name}
+	AckPrefix = "ACK|"
 )
 
 type Config struct {
@@ -47,6 +55,11 @@ type Config struct {
 	ListenIP              string `json:"listen_ip"`
 	LocalIP               string `json:"local_ip"`
 	ExternalIP            string `json:"external_ip"`
+
+	// Test mode configuration
+	TestMode       bool   `json:"test_mode"`        // Enable detailed test message tracking
+	TestReportFile string `json:"test_report_file"` // Output file for test report (JSON)
+	EnhancedAck    bool   `json:"enhanced_ack"`     // Use structured ACK format: ACK|seq|ts|id
 }
 
 // Metrics tracks runtime statistics with thread-safe access
@@ -60,6 +73,135 @@ type Metrics struct {
 	LastReceiveTime    time.Time
 	DetectedSourceIP   string // Detected from incoming packets
 	mu                 sync.RWMutex
+}
+
+// TestRecord tracks a single test message for drop analysis
+type TestRecord struct {
+	SeqNum          int64     `json:"seq_num"`
+	ReceiveTime     time.Time `json:"receive_time"`
+	AckTime         time.Time `json:"ack_time"`
+	SourceAddr      string    `json:"source_addr"`
+	SenderTimestamp int64     `json:"sender_timestamp_ns,omitempty"` // From TIMESTAMP prefix
+	LatencyMs       float64   `json:"latency_ms,omitempty"`
+	PayloadSize     int       `json:"payload_size"`
+	AckSent         bool      `json:"ack_sent"`
+	Message         string    `json:"message,omitempty"` // Optional: first 100 chars
+}
+
+// TestReport is the output format for test-mode analysis
+type TestReport struct {
+	ListenerID       string       `json:"listener_id"`
+	ListenAddr       string       `json:"listen_addr"`
+	StartTime        time.Time    `json:"start_time"`
+	EndTime          time.Time    `json:"end_time"`
+	TotalReceived    int64        `json:"total_received"`
+	TotalAcked       int64        `json:"total_acked"`
+	FirstSeq         int64        `json:"first_seq"`
+	LastSeq          int64        `json:"last_seq"`
+	ExpectedCount    int64        `json:"expected_count,omitempty"` // LastSeq - FirstSeq + 1 if sequential
+	MissingSeqs      []int64      `json:"missing_seqs,omitempty"`   // Detected gaps
+	AvgLatencyMs     float64      `json:"avg_latency_ms"`
+	MinLatencyMs     float64      `json:"min_latency_ms"`
+	MaxLatencyMs     float64      `json:"max_latency_ms"`
+	Records          []TestRecord `json:"records"`
+}
+
+// TestTracker manages test message tracking
+type TestTracker struct {
+	records   []TestRecord
+	seqMap    map[int64]bool // Track seen sequence numbers for gap detection
+	startTime time.Time
+	mu        sync.RWMutex
+}
+
+// NewTestTracker creates a new test tracker
+func NewTestTracker() *TestTracker {
+	return &TestTracker{
+		records:   make([]TestRecord, 0, 10000),
+		seqMap:    make(map[int64]bool),
+		startTime: time.Now(),
+	}
+}
+
+// AddRecord adds a test record
+func (t *TestTracker) AddRecord(rec TestRecord) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.records = append(t.records, rec)
+	if rec.SeqNum > 0 {
+		t.seqMap[rec.SeqNum] = true
+	}
+}
+
+// GenerateReport creates the final test report
+func (t *TestTracker) GenerateReport(listenerID, listenAddr string) TestReport {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	report := TestReport{
+		ListenerID:    listenerID,
+		ListenAddr:    listenAddr,
+		StartTime:     t.startTime,
+		EndTime:       time.Now(),
+		TotalReceived: int64(len(t.records)),
+		Records:       t.records,
+	}
+
+	if len(t.records) == 0 {
+		return report
+	}
+
+	// Calculate statistics
+	var totalLatency, minLatency, maxLatency float64
+	var latencyCount int64
+	var firstSeq, lastSeq int64 = -1, -1
+	var ackedCount int64
+
+	for _, rec := range t.records {
+		if rec.AckSent {
+			ackedCount++
+		}
+		if rec.LatencyMs > 0 {
+			totalLatency += rec.LatencyMs
+			latencyCount++
+			if minLatency == 0 || rec.LatencyMs < minLatency {
+				minLatency = rec.LatencyMs
+			}
+			if rec.LatencyMs > maxLatency {
+				maxLatency = rec.LatencyMs
+			}
+		}
+		if rec.SeqNum > 0 {
+			if firstSeq == -1 || rec.SeqNum < firstSeq {
+				firstSeq = rec.SeqNum
+			}
+			if rec.SeqNum > lastSeq {
+				lastSeq = rec.SeqNum
+			}
+		}
+	}
+
+	report.TotalAcked = ackedCount
+	report.FirstSeq = firstSeq
+	report.LastSeq = lastSeq
+
+	if latencyCount > 0 {
+		report.AvgLatencyMs = totalLatency / float64(latencyCount)
+		report.MinLatencyMs = minLatency
+		report.MaxLatencyMs = maxLatency
+	}
+
+	// Detect missing sequences (gaps)
+	if firstSeq > 0 && lastSeq > firstSeq {
+		report.ExpectedCount = lastSeq - firstSeq + 1
+		for seq := firstSeq; seq <= lastSeq; seq++ {
+			if !t.seqMap[seq] {
+				report.MissingSeqs = append(report.MissingSeqs, seq)
+			}
+		}
+	}
+
+	return report
 }
 
 // MetricsPayload is sent to dashboard
@@ -84,6 +226,7 @@ type MetricsPayload struct {
 var (
 	cfg         Config
 	metrics     = &Metrics{}
+	testTracker *TestTracker
 	shutdownCtx context.Context
 	cancelFunc  context.CancelFunc
 )
@@ -163,7 +306,20 @@ func main() {
 
 	log.Printf("listening for UDP packets on %s, writing CSV to %s", cfg.ListenAddr, outputPath)
 	if cfg.ReplyMode {
-		log.Printf("reply mode enabled: will respond with %q", cfg.AckMessage)
+		if cfg.EnhancedAck {
+			log.Printf("reply mode enabled: enhanced ACK format (ACK|seq|ts|%s)", cfg.IDName)
+		} else {
+			log.Printf("reply mode enabled: will respond with %q", cfg.AckMessage)
+		}
+	}
+
+	// Initialize test tracker if test mode is enabled
+	if cfg.TestMode {
+		testTracker = NewTestTracker()
+		log.Printf("test mode enabled: tracking all messages for drop analysis")
+		if cfg.TestReportFile != "" {
+			log.Printf("test report will be written to: %s", cfg.TestReportFile)
+		}
 	}
 
 	// Start dashboard heartbeat if configured
@@ -228,6 +384,9 @@ func main() {
 					plaintext = originalPayload
 				}
 
+				// Extract sequence number from TEST| prefix if present
+				seqNum := extractSequenceNumber(plaintext)
+
 				// Update metrics
 				atomic.AddInt64(&metrics.PacketsReceived, 1)
 				atomic.AddInt64(&metrics.BytesReceived, int64(len(rawData)))
@@ -265,10 +424,40 @@ func main() {
 				}
 				writer.Flush()
 
+				var ackSent bool
 				if cfg.ReplyMode && decryptSuccess {
-					if _, err := conn.WriteToUDP([]byte(cfg.AckMessage), remote); err != nil {
-						log.Printf("failed to send ACK to %s: %v", remote, err)
+					var ackData []byte
+					if cfg.EnhancedAck {
+						// Enhanced ACK format: ACK|{seq}|{receive_ts_ns}|{id_name}
+						ackData = []byte(fmt.Sprintf("ACK|%d|%d|%s", seqNum, receiveTime.UnixNano(), cfg.IDName))
+					} else {
+						ackData = []byte(cfg.AckMessage)
 					}
+					if _, err := conn.WriteToUDP(ackData, remote); err != nil {
+						log.Printf("failed to send ACK to %s: %v", remote, err)
+					} else {
+						ackSent = true
+					}
+				}
+
+				// Track test record if test mode is enabled
+				if testTracker != nil {
+					msgPreview := string(plaintext)
+					if len(msgPreview) > 100 {
+						msgPreview = msgPreview[:100] + "..."
+					}
+					rec := TestRecord{
+						SeqNum:          seqNum,
+						ReceiveTime:     receiveTime,
+						AckTime:         time.Now(),
+						SourceAddr:      remote.String(),
+						SenderTimestamp: senderTimestamp,
+						LatencyMs:       latencyMs,
+						PayloadSize:     len(rawData),
+						AckSent:         ackSent,
+						Message:         msgPreview,
+					}
+					testTracker.AddRecord(rec)
 				}
 
 				if latencyMs >= 0 {
@@ -284,9 +473,72 @@ func main() {
 	<-shutdownCtx.Done()
 	log.Println("shutting down...")
 
+	// Write test report if test mode was enabled
+	if testTracker != nil {
+		writeTestReport()
+	}
+
 	// Wait for heartbeat goroutine
 	wg.Wait()
 	log.Println("shutdown complete")
+}
+
+// writeTestReport generates and writes the test report to file
+func writeTestReport() {
+	report := testTracker.GenerateReport(cfg.IDName, cfg.ListenAddr)
+
+	// Print summary to console
+	log.Println("═══════════════════════════════════════════════════════════════")
+	log.Println("                    TEST MODE SUMMARY")
+	log.Println("═══════════════════════════════════════════════════════════════")
+	log.Printf("  Total Received:  %d packets", report.TotalReceived)
+	log.Printf("  Total ACKed:     %d packets", report.TotalAcked)
+	if report.FirstSeq > 0 {
+		log.Printf("  Sequence Range:  %d - %d", report.FirstSeq, report.LastSeq)
+		log.Printf("  Expected Count:  %d", report.ExpectedCount)
+		if len(report.MissingSeqs) > 0 {
+			log.Printf("  Missing Seqs:    %d (DROPS DETECTED)", len(report.MissingSeqs))
+			// Show first 10 missing sequences
+			showCount := len(report.MissingSeqs)
+			if showCount > 10 {
+				showCount = 10
+			}
+			log.Printf("  First Missing:   %v...", report.MissingSeqs[:showCount])
+		} else {
+			log.Printf("  Missing Seqs:    0 (no drops detected)")
+		}
+	}
+	if report.AvgLatencyMs > 0 {
+		log.Printf("  Latency (avg):   %.3f ms", report.AvgLatencyMs)
+		log.Printf("  Latency (min):   %.3f ms", report.MinLatencyMs)
+		log.Printf("  Latency (max):   %.3f ms", report.MaxLatencyMs)
+	}
+	log.Println("═══════════════════════════════════════════════════════════════")
+
+	// Write to file if configured
+	reportFile := cfg.TestReportFile
+	if reportFile == "" {
+		// Generate default filename
+		reportFile = filepath.Join(cfg.CaptureDir, fmt.Sprintf("%d_test_report.json", time.Now().Unix()))
+	}
+
+	data, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		log.Printf("failed to marshal test report: %v", err)
+		return
+	}
+
+	if err := os.MkdirAll(filepath.Dir(reportFile), 0o755); err != nil {
+		log.Printf("failed to create report directory: %v", err)
+		return
+	}
+
+	if err := os.WriteFile(reportFile, data, 0o644); err != nil {
+		log.Printf("failed to write test report: %v", err)
+		return
+	}
+
+	log.Printf("test report written to: %s", reportFile)
 }
 
 func loadConfig() Config {
@@ -321,6 +573,9 @@ func loadConfig() Config {
 		ListenIP:              getEnv("LISTEN_IP", ""),
 		LocalIP:               getEnv("LOCAL_IP", ""),
 		ExternalIP:            getEnv("EXTERNAL_IP", ""),
+		TestMode:              getEnv("TEST_MODE", "false") == "true",
+		TestReportFile:        getEnv("TEST_REPORT_FILE", ""),
+		EnhancedAck:           getEnv("ENHANCED_ACK", "false") == "true",
 	}
 
 	applyConfigDefaults(&cfg)
@@ -390,6 +645,45 @@ func extractTimestamp(data []byte) ([]byte, int64) {
 	// Return the original payload after the timestamp prefix
 	originalPayload := afterPrefix[delimIdx+1:]
 	return originalPayload, timestamp
+}
+
+// extractSequenceNumber extracts sequence number from TEST|{seq}|{payload} format
+// Also tries to extract from JSON payloads with "seq" or "sequence" fields
+// Returns 0 if no sequence number found
+func extractSequenceNumber(data []byte) int64 {
+	// Try TEST| prefix format first
+	if bytes.HasPrefix(data, []byte(TestMessagePrefix)) {
+		afterPrefix := data[len(TestMessagePrefix):]
+		delimIdx := bytes.Index(afterPrefix, []byte("|"))
+		if delimIdx > 0 {
+			seqStr := string(afterPrefix[:delimIdx])
+			if seq, err := strconv.ParseInt(seqStr, 10, 64); err == nil {
+				return seq
+			}
+		}
+	}
+
+	// Try to extract from JSON payload
+	var jsonData map[string]interface{}
+	if err := json.Unmarshal(data, &jsonData); err == nil {
+		// Try common sequence field names
+		for _, key := range []string{"seq", "sequence", "seq_num", "seqnum", "packet_num", "id"} {
+			if val, ok := jsonData[key]; ok {
+				switch v := val.(type) {
+				case float64:
+					return int64(v)
+				case int64:
+					return v
+				case string:
+					if seq, err := strconv.ParseInt(v, 10, 64); err == nil {
+						return seq
+					}
+				}
+			}
+		}
+	}
+
+	return 0
 }
 
 func decryptWithPassphrase(ciphertext []byte, passphrase string) ([]byte, error) {

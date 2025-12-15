@@ -3,6 +3,7 @@
   "capture_dir": "/captures",
   "buffer_size": 2048,
   "reply_mode": true,
+  "id_name": "LISTENER-01",
   "ack_message": "ACK-PLTEST_{id_name}",
   "encryption_passphrase": "entrust-spearmint-defy-nutrient-facial-blinking",
   "file_receive_mode": true,
@@ -12,6 +13,11 @@
   "heartbeat_interval_seconds": 5,
   "listen_ip": "",
   "local_ip": "",
-  "external_ip": ""
+  "external_ip": "",
+
+  "_comment_test_mode": "Test mode options for drop analysis",
+  "test_mode": false,
+  "test_report_file": "/captures/test_report.json",
+  "enhanced_ack": true
 }
 

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  udp-sender:
+    image: ghcr.io/malindarathnayake/packet-wire-udp-sender:latest
+    container_name: packet-wire-sender
+    command: >
+      --target udp-listener:9000
+      --message "Test packet from sender"
+      --interval 10s
+      --timestamp
+      --client-id sender-01
+      --dashboard-url http://dashboard:8080/api/metrics
+    networks:
+      - packet-wire
+    restart: unless-stopped
+
+networks:
+  packet-wire:
+    driver: bridge
+    name: packet-wire-network
+
