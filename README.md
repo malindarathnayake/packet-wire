@@ -225,11 +225,9 @@ See [Deployment Guide](./deploy/README.md) for detailed instructions.
 
 ## Documentation
 
-- [Engineering Standards](./_docs/engineering-standards.md)
+
 - [API Reference](./_docs/api-reference.md)
 - [Dashboard Metrics Spec](./_docs/dashboard-metrics-spec.md)
-- [Implementation Guide](./_docs/implementation-guide.md)
-- [PW-Test Workflow](./_docs/test-workflow.md) - Drop analysis and packet testing
 
 ## License
 
