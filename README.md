@@ -78,15 +78,11 @@ TCP equivalent of UDP sender with optional TLS (`crypto/tls`). Length-prefixed f
 
 ## Architecture
 
-```
-┌─────────────┐                  ┌──────────────┐                 ┌────────────┐
-│ UDP Sender  │  ────UDP────>    │ UDP Listener │  ───metrics───> │ Dashboard  │
-│  (Client)   │                  │   (Server)   │                 │   (Web)    │
-└─────────────┘                  └──────────────┘                 └────────────┘
-                                         │
-                                         ▼
-                                   CSV Captures
-                                   /captures/*.csv
+```mermaid
+flowchart LR
+    Sender[UDP Sender<br/>Client] -->|UDP| Listener[UDP Listener<br/>Server]
+    Listener -->|metrics| Dashboard[Dashboard<br/>Web UI]
+    Listener -->|writes| CSV[(CSV Captures<br/>/captures/*.csv)]
 ```
 
 ## Quick Start (All Services)
