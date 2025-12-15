@@ -228,6 +228,7 @@ See [Deployment Guide](./deploy/README.md) for detailed instructions.
 
 - [API Reference](./_docs/api-reference.md)
 - [Dashboard Metrics Spec](./_docs/dashboard-metrics-spec.md)
+- [PW-Test Workflow](./_docs/test-workflow.md) - Drop analysis and packet testing
 
 ## License
 
