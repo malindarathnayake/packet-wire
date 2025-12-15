@@ -1,0 +1,54 @@
+{
+  "targets": [
+    {
+      "name": "powertelematics-calamplmd-18172",
+      "address": "192.203.241.26:18172",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "rhinorus-antxwithackfuel-18677",
+      "address": "192.203.241.26:18677",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "newgate-calampnsewcan-18809",
+      "address": "192.203.241.26:18809",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "brickhouse-queclinkgl300m-18873",
+      "address": "192.203.241.26:18873",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "soltrack-calamplmd-20845",
+      "address": "192.203.241.26:20845",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "logisticavehicular-calamplmd-20671",
+      "address": "192.203.241.26:20671",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "fassystem-suntechst4340-20705",
+      "address": "192.203.241.26:20705",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "birdseye-xirgobinary-22059",
+      "address": "192.203.241.26:22059",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "docomo-calamplmd-22255",
+      "address": "192.203.241.26:22255",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "integrity-pacifictrackpt40-22223",
+      "address": "192.203.241.26:22223",
+      "message": "PLTESTMESSAGE"
+    }
+  ]
+}

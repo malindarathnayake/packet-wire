@@ -1,0 +1,30 @@
+{
+  "targets": [
+    {
+      "name": "Server-Port-20671",
+      "address": "192.168.94.22:20671",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "Server-Port-20672",
+      "address": "192.168.94.22:20672",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "Server-Port-20673",
+      "address": "192.168.94.22:20673",
+      "message": "PLTESTMESSAGE"
+    },
+    {
+      "name": "Server-Port-9000",
+      "address": "192.168.94.22:9000",
+      "message": "ALTMESSAGE"
+    },
+    {
+      "name": "Backup-Server",
+      "address": "192.168.94.23:20671",
+      "message": "PLTESTMESSAGE"
+    }
+  ]
+}
+
