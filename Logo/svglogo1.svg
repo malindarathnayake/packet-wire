@@ -1,8 +1,7 @@
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 1600 614" xml:space="preserve">
   
   <!-- GROUP 1: THE ICON (Left Side) -->
-  <!-- EXPLICITLY set stroke="none" here to protect the logo from the text outline -->
-  <g id="Icon" stroke="none" stroke-width="0">
+  <g id="Icon">
     <!-- Dark Blue Nodes -->
     <path style="fill:#0b364b;" d="M256.001,495.949c-64.093,0-124.349-24.958-169.669-70.279 c-45.321-45.32-70.279-105.576-70.279-169.669S41.011,131.65,86.33,86.33s105.577-70.278,169.671-70.278 S380.35,41.011,425.67,86.332c6.645,6.645,6.645,17.421,0,24.068c-6.647,6.645-17.419,6.644-24.068,0 c-38.892-38.892-90.6-60.31-145.603-60.31S149.289,71.508,110.397,110.4s-60.31,90.6-60.31,145.603s21.418,106.711,60.31,145.603 s90.6,60.31,145.603,60.31s106.711-21.418,145.603-60.31c40.863-40.863,62.764-97.427,60.089-155.192 c-0.436-9.39,6.824-17.351,16.211-17.787c9.324-0.456,17.351,6.822,17.787,16.211c3.118,67.308-22.404,133.219-70.021,180.836 C380.35,470.991,320.094,495.949,256.001,495.949z"></path>
     <path style="fill:#0b364b;" d="M413.635,430.652c-4.357,0-8.71-1.663-12.033-4.984L86.33,110.398 c-6.645-6.645-6.645-17.421,0-24.068c6.647-6.644,17.419-6.644,24.068,0L425.67,401.602c6.645,6.645,6.645,17.421,0,24.068 C422.346,428.992,417.991,430.652,413.635,430.652z"></path>
@@ -22,12 +21,8 @@
   </g>
 
   <!-- GROUP 2: THE TEXT (Right Side) -->
-  <!-- 
-       Outline settings are applied HERE ONLY.
-       stroke="#808080" = 50% Grey
-       paint-order="stroke fill" = Draws stroke behind the text so letters don't look thin
-  -->
-  <text x="600" y="310" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="160" stroke="#808080" stroke-width="3" paint-order="stroke fill">
+  <!-- Using a system font stack to ensure it works on most devices -->
+  <text x="600" y="310" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="160">
     <tspan fill="#555555" font-weight="400">Packet</tspan><tspan fill="#0b364b" font-weight="700">Wire</tspan>
   </text>
   
