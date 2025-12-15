@@ -4,91 +4,75 @@
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey)
 
-A comprehensive UDP testing and monitoring toolkit for network traffic analysis, visualization, and simulation.
+UDP testing toolkit: capture, send, and visualize UDP traffic.
 
 ## Overview
 
-Packet Wire consists of three containerized applications that work together to capture, send, and visualize UDP traffic flows in real-time. Designed for testing UDP-based systems, IoT device simulation, and network traffic analysis.
+Three containerized Go applications for UDP traffic capture, transmission, and monitoring. Useful for testing UDP endpoints, simulating IoT devices, and debugging network issues.
 
 ## Components
 
-### 🎯 [UDP Listener](./udp-listener/README.md)
+### [UDP Listener](./udp-listener/README.md)
 
-High-performance UDP packet capture service that receives and logs all incoming packets to CSV files with real-time metrics reporting.
+Receives UDP packets and logs them to CSV files.
 
-**Key Features:**
-- CSV logging with timestamps, source IP, and payload
-- Optional reply/ACK mode with enhanced ACK format
-- AES-256-GCM encryption support
+- CSV logging (timestamp, source IP, payload size, message)
+- Reply/ACK mode (simple or enhanced format)
+- AES-256-GCM decryption
 - File reception mode
-- **Test Mode** for drop analysis with sequence tracking
-- Metrics reporting to dashboard API
-- Docker-ready with configurable ports
+- Test mode with sequence tracking for drop analysis
+- Metrics reporting to dashboard
 
-**Quick Start:**
 ```bash
 docker build -f udp-listener/Dockerfile -t udp-listener:latest udp-listener
 docker run -p 9000:9000/udp -v ./captures:/captures udp-listener:latest
 ```
 
-[Full Documentation →](./udp-listener/README.md)
+---
+
+### TCP/TLS Listener *(WIP)*
+
+TCP equivalent of UDP listener with optional TLS (`crypto/tls`). Same CSV capture + metrics model. Not yet implemented.
 
 ---
 
-### 🔒📡 TCP/TLS Listener (New)
+### [Dashboard](./dashboard/README.md)
 
-`tcp-listener` is the TCP equivalent of the UDP listener, with optional TLS using Go's standard library (`crypto/tls`) and the same CSV capture + metrics model.
+Web UI for viewing traffic flows and metrics.
 
----
-
-### 📊 [Dashboard](./dashboard/README.md)
-
-Real-time traffic flow visualization dashboard with interactive Sankey diagrams for analyzing UDP packet routing and latency.
-
-**Key Features:**
-- Interactive Sankey flow diagrams
-- Real-time metrics (packets, latency, success rates)
-- Multi-source aggregation
+- Sankey flow diagrams
+- Packet counts, latency, success rates
 - Time-based filtering (5m to 24h)
 - WebSocket updates
-- Custom flow visualization
 
-**Quick Start:**
 ```bash
 docker build -f dashboard/Dockerfile -t dashboard:latest dashboard
 docker run -p 8080:8080 dashboard:latest
 ```
 
-[Full Documentation →](./dashboard/README.md)
-
 ---
 
-### 📤 [UDP Sender](./udp-sender/README.md)
+### [UDP Sender](./udp-sender/README.md)
 
-CLI tool for sending UDP messages and chunked file payloads to simulate IoT devices and test UDP endpoints.
+CLI for sending UDP packets.
 
-**Key Features:**
-- Send text messages or binary files
+- Text messages or binary files
 - Chunked file transmission
 - AES-256-GCM encryption
-- Configurable chunk size and delays
-- Timestamp injection for latency testing
-- **PW-Test Mode** for packet drop analysis
-- Metrics reporting to dashboard API
+- Timestamp injection for latency measurement
+- PW-Test mode for drop analysis
+- Continuous/burst sending modes
 
-**Quick Start:**
 ```bash
 docker build -f udp-sender/Dockerfile -t udp-sender:latest udp-sender
 docker run --rm udp-sender --target 192.168.1.100:9000 --message "TEST"
 ```
 
-[Full Documentation →](./udp-sender/README.md)
-
 ---
 
-### 🔒📤 TCP/TLS Sender (New)
+### TCP/TLS Sender *(WIP)*
 
-`tcp-sender` is the TCP equivalent of the UDP sender, with optional TLS (`crypto/tls`). It uses simple length-prefixed framing so messages and file chunks have clear boundaries.
+TCP equivalent of UDP sender with optional TLS (`crypto/tls`). Length-prefixed framing. Not yet implemented.
 
 ---
 
@@ -222,7 +206,7 @@ See [Deployment Guide](./deploy/README.md) for detailed instructions.
 - [API Reference](./_docs/api-reference.md)
 - [Dashboard Metrics Spec](./_docs/dashboard-metrics-spec.md)
 - [Implementation Guide](./_docs/implementation-guide.md)
-- [**PW-Test Workflow**](./_docs/test-workflow.md) - Drop analysis and packet testing guide
+- [PW-Test Workflow](./_docs/test-workflow.md) - Drop analysis and packet testing
 
 ## License
 
