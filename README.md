@@ -14,6 +14,22 @@ UDP testing toolkit: capture, send, and visualize UDP traffic.
 
 Three containerized Go applications for UDP traffic capture, transmission, and monitoring. Useful for testing UDP endpoints, simulating IoT devices, and debugging network issues.
 
+## Why use this?
+
+Sending a UDP packet is 5 lines of Python. This is for  **testing and debugging UDP flows** in a contolled environment
+
+What you get that a quick script doesn't:
+
+- **Drop analysis** — Sequence tracking to find where packets disappear
+- **Latency measurement** — Automatic RTT tracking across your network
+- **Stress testing** — Ramp up PPS until you find the breaking point
+- **Structured captures** — CSV logs with timestamps, source IPs, latencies
+- **Visual dashboard** — Sankey diagrams showing traffic flows in real-time
+- **Encryption** — AES-256-GCM when you need it
+- **Docker-ready** — Pre-built images, no setup
+
+If you just need to send one packet, use netcat. If you're debugging production UDP issues or validating network reliability, this saves you from building the instrumentation yourself. I built this for my personal use to fill a gap in my toolbox.
+
 ## Components
 
 ### [UDP Listener](./udp-listener/README.md)
