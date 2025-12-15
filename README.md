@@ -89,7 +89,30 @@ flowchart LR
     Listener -->|writes| CSV[(CSV Captures<br/>/captures/*.csv)]
 ```
 
-## Quick Start (All Services)
+## Quick Start
+
+Pull the pre-built images:
+
+```bash
+docker pull ghcr.io/malindarathnayake/packet-wire-udp-listener:latest
+docker pull ghcr.io/malindarathnayake/packet-wire-udp-sender:latest
+```
+
+Run the listener:
+
+```bash
+docker run -p 9000:9000/udp -v ./captures:/captures \
+  ghcr.io/malindarathnayake/packet-wire-udp-listener:latest
+```
+
+Send a test packet:
+
+```bash
+docker run --rm ghcr.io/malindarathnayake/packet-wire-udp-sender:latest \
+  --target host.docker.internal:9000 --message "TEST"
+```
+
+## All Services (Docker Compose)
 
 ### Using Docker Compose
 
