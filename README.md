@@ -237,6 +237,11 @@ Ready-to-use Docker Compose configurations are available in the [`deploy/`](./de
 - **Full Stack:** Dashboard + UDP Listener + UDP Sender
 - **Config Files:** Pre-configured settings for each service
 
+**Quick Setup (download deploy files):**
+```bash
+curl -sSL https://raw.githubusercontent.com/malindarathnayake/packet-wire/main/deploy/download-deploy.sh | bash
+```
+
 See [Deployment Guide](./deploy/README.md) for detailed instructions.
 
 ## Documentation
